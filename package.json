@@ -1,6 +1,6 @@
 {
   "name": "react-native-instantpay-exception-handler",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A react native module that lets you to register a global error handler that can capture fatal/non fatal uncaught exceptions. The module helps prevent abrupt crashing of RN Apps without a graceful message to the user.",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
@@ -47,7 +47,11 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "error exception",
+    "catch error",
+    "InstantPay",
+    "ipay"
   ],
   "repository": {
     "type": "git",
