@@ -21,7 +21,7 @@ const noop = () => { };
 
 var global:any = global;
 
-const RNException = {
+const RNException = (Platform.OS === "ios") ? null : {
     setJSExceptionHandler : (customHandler = noop, allowedInDevMode = false) => {
 
         if (typeof allowedInDevMode !== "boolean" || typeof customHandler !== "function") {

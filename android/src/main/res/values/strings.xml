@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="show_error_details"><u>SHOW ERROR DETAILS</u></string>
+    <string name="error_title"><b>Error :</b></string>
+    <string name="cause_title"><b>Cause :</b></string>
 </resources>

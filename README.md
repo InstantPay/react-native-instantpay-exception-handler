@@ -93,6 +93,19 @@ RNException.setNativeExceptionHandler(
 It is recommended you set both the handlers.
 **NOTE: `setNativeExceptionHandler` only works in bundled mode - it will show the red screen when applied to dev mode.**
 
+## Use Cases In Android
+
+Open up `android/app/src/main/java/[...]/MainApplication.java`
+
+- Add `import com.instantpayexceptionhandler.InstantpayExceptionHandlerModule` to the imports at the top of the file
+- Add below code inside `onCreate()` method
+
+```
+InstantpayExceptionHandlerModule.setAplicationContext = this
+InstantpayExceptionHandlerModule.catchNativeException()
+
+```
+
 ## License
 
 MIT

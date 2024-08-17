@@ -1,6 +1,9 @@
 package com.instantpayexceptionhandler
 
+import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Callback
@@ -20,13 +23,20 @@ class InstantpayExceptionHandlerModule(reactContext: ReactApplicationContext) : 
     private var callBackHolder: Callback? = null
     private var originalHandler: Thread.UncaughtExceptionHandler? = null
 
-
     companion object {
         const val NAME = "InstantpayExceptionHandler"
 
         private lateinit var nativeExceptionHandler: NativeExceptionHandlerIfc
 
-        private var errorIntentTargetClass = DefaultErrorScreen.javaClass::class
+        private var errorIntentTargetClass = DefaultErrorScreen::class.java
+
+        var defaultUncaughtExceptionHandler: Thread.UncaughtExceptionHandler? = null
+
+        var systemThread: Thread? = null
+
+        var systemThrowable: Throwable? = null
+
+        var setAplicationContext: Context? = null
 
         fun replaceErrorScreenActivityClass(errorScreenActivityClass: KClass<*>) {
             //errorIntentTargetClass = errorScreenActivityClass
@@ -35,16 +45,40 @@ class InstantpayExceptionHandlerModule(reactContext: ReactApplicationContext) : 
         fun setNativeExceptionHandler(nativeExceptionHandler: NativeExceptionHandlerIfc){
             InstantpayExceptionHandlerModule.nativeExceptionHandler = nativeExceptionHandler
         }
+
+        fun catchNativeException(){
+
+            defaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
+
+            Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+
+                systemThread = thread
+
+                systemThrowable = throwable
+
+                handleUncaughtException(thread, throwable)
+            }
+        }
+
+        private fun handleUncaughtException(thread: Thread, throwable: Throwable) {
+            Handler(Looper.getMainLooper()).post {
+                showAlertDialog(thread, throwable)
+            }
+        }
+
+        private fun showAlertDialog(thread: Thread, throwable: Throwable) {
+            val intents = Intent(setAplicationContext, errorIntentTargetClass).apply {
+                putExtra("throwable", throwable)
+                putExtra("thread_id", thread.id)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+
+            setAplicationContext?.startActivity(intents)
+        }
     }
 
     override fun getName(): String {
         return NAME
-    }
-
-
-    @ReactMethod
-    fun multiply(a: Double, b: Double, promise: Promise) {
-        promise.resolve(a * b)
     }
 
     @ReactMethod
@@ -67,9 +101,11 @@ class InstantpayExceptionHandlerModule(reactContext: ReactApplicationContext) : 
 
                 val intent = Intent();
 
-                intent.setClass(activity!!, errorIntentTargetClass.java)
+                intent.setClass(activity!!, errorIntentTargetClass)
 
-                intent.putExtra("stack_trace_string", stackTraceString)
+                intent.putExtra("throwable", throwable)
+
+                intent.putExtra("thread_id", thread.id)
 
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
